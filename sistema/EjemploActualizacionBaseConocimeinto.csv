@@ -1,0 +1,44 @@
+Incidente,Resolucion
+"Un usuario reporta que no puede acceder al módulo de inscripción de materias en el sistema de gestión académica universitario. El problema se manifiesta con errores al cargar la página o lentitud en el sistema. Los mensajes y logs de error indicados son:
+
+    Mensaje del usuario:
+        ""Error 500: Internal Server Error. No se puede procesar la solicitud en este momento.""
+        ""Conexión con la base de datos interrumpida. Intente nuevamente más tarde.""
+
+    Log del servidor web:
+        ERROR: TimeoutException at /inscripcion/materias - Request timed out after 30s
+        SQLSTATE[08006] [7] Could not connect to server: Connection timed out (errno: 110)
+        FATAL: could not write to log file: No space left on device
+
+    Log de la base de datos:
+        ERROR: failed to allocate memory for query execution
+        Warning: Slow query detected: SELECT * FROM students WHERE enrollment = 'open' took 45s to execute","Verificación del estado del sistema:
+
+    Se revisó el estado de los servicios web y de la base de datos. Los logs indicaban que el servidor estaba sin espacio en la partición /var/log.
+
+Liberación de espacio en disco:
+
+    Se utilizó el comando df -h para identificar la partición llena y luego se rotaron y eliminaron logs antiguos con logrotate y rm, liberando espacio.
+
+Reinicio de servicios:
+
+    Se reiniciaron los servicios con los comandos:
+
+    bash
+
+    sudo systemctl restart apache2
+    sudo systemctl restart postgresql
+
+    Esto restauró el acceso al sistema y la conexión con la base de datos.
+
+Optimización de la base de datos:
+
+    Se analizaron las consultas lentas usando pg_stat_activity. Se optimizaron las consultas relacionadas con inscripciones creando índices en las tablas más consultadas, mejorando el rendimiento.
+
+Monitoreo y pruebas:
+
+    Se implementó monitoreo con herramientas como Grafana para asegurar que no hubiera problemas de carga ni cuellos de botella. Además, se ejecutaron pruebas de rendimiento para garantizar la estabilidad.
+
+Notificación al usuario:
+
+    Una vez solucionado, se informó a los usuarios que el sistema estaba nuevamente operativo y que podían acceder al módulo de inscripción sin inconvenientes."
